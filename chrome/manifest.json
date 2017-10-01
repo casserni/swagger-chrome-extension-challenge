@@ -1,0 +1,22 @@
+{
+  "version": "0.0.0",
+  "name": "stoplight-coding-challenge",
+  "manifest_version": 2,
+  "description": "Stoplight Coding Challenge - Swagger Request Maker",
+  "page_action": {
+    "default_title": "Stoplight Coding Challenge",
+    "default_popup": "popup.html"
+  },
+  "background": {
+    "page": "background.html"
+  },
+  "content_scripts": [
+    {
+      "matches": ["*://*/*.json*"],
+      "js": ["content.js"],
+      "run_at": "document_start"
+    }
+  ],
+  "permissions": ["contextMenus", "management", "tabs", "storage"],
+  "content_security_policy": "default-src 'self'; script-src 'self' http://localhost:3000 https://localhost:3000 'unsafe-eval'; connect-src http://* https://* 'unsafe-eval' 'unsafe-inline'; style-src * 'unsafe-inline' 'self' blob:; img-src 'self' data:;"
+}

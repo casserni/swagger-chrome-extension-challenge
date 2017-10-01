@@ -1,0 +1,8 @@
+// http://eslint.org/docs/rules
+{
+  "extends": "stoplight",
+  "globals": {
+    "Offline": true,
+    "ga": true
+  }
+}
