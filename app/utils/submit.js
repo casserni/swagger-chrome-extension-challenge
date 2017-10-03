@@ -9,11 +9,13 @@ let sendRequest = (scheme, path, method, payload) => {
   } else {
     url = `${scheme}://todos.stoplight.io${path}?apikey=123`;
   }
+
   let doc = {
     path: url,
     method: method,
     payload: pay,
   };
+
   let send = request;
   switch (method.toUpperCase()) {
     case 'GET':
@@ -23,6 +25,7 @@ let sendRequest = (scheme, path, method, payload) => {
         db.insert(doc, function(err, newDoc) {});
       });
       break;
+
     case 'POST':
       send.post(url).send(pay).set('accept', 'json').end((err, res) => {
         doc.responseStatus = res.statusText;
@@ -30,6 +33,7 @@ let sendRequest = (scheme, path, method, payload) => {
         db.insert(doc, function(err, newDoc) {});
       });
       break;
+
     case 'PUT':
       send.put(url).send(pay).set('accept', 'json').end((err, res) => {
         doc.responseStatus = res.statusText;
@@ -37,6 +41,7 @@ let sendRequest = (scheme, path, method, payload) => {
         db.insert(doc, function(err, newDoc) {});
       });
       break;
+
     case 'PATCH':
       send.patch(url).send(pay).set('accept', 'json').end((err, res) => {
         doc.responseStatus = res.statusText;
@@ -44,6 +49,7 @@ let sendRequest = (scheme, path, method, payload) => {
         db.insert(doc, function(err, newDoc) {});
       });
       break;
+
     case 'DELETE':
       send.delete(url).send(pay).set('accept', 'json').end((err, res) => {
         doc.responseStatus = res.statusText;

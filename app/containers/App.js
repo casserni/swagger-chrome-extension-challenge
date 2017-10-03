@@ -2,22 +2,18 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { reduxForm } from 'redux-form';
 import RequestForm from './RequestForm.js';
-import style from './App.css';
 
 class App extends React.Component {
   render() {
     const { swagger } = this.props;
     return (
-      <div className={style.App}>
-        <h1 className={style.center}>Swagger Request Maker</h1>
-
-        <div>Your Json is below!</div>
-        <pre className={style.SwaggerDebug}>
-          <code>
-            {JSON.stringify(swagger, null, 4)}
-          </code>
-        </pre>
-        <RequestForm swagger={swagger} />
+      <div className="row">
+        <div className="col-xs-1" />
+        {/*  offset doesnt work so included an empty column to offset */}
+        <div className="col-xs-10 col-xs-offset-1 center-block">
+          <h2 className="text-center">Swagger Request Maker</h2>
+          <RequestForm swagger={swagger} />
+        </div>
       </div>
     );
   }
@@ -29,9 +25,6 @@ function mapStateToProps(state) {
 
 App = connect(mapStateToProps)(App);
 
-App = reduxForm({
-  // a unique name for the form
+export default reduxForm({
   form: 'request',
 })(App);
-
-export default App;

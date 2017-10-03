@@ -1,31 +1,8 @@
 .App {
-  color: white;
-  background-color: black;
-  padding: 5px
 }
 
 .SwaggerDebug {
   max-height: 400px;
   overflow: auto;
-  background-color: black;
-  color: #40c929;
-  border-style:solid;
-  border-width: thin;
-  border-color: white;
-  padding: 5px;
   font-size: 12px
-}
-
-.center {
-  text-align: center;
-}
-
-.table {
-  margin: auto;
-}
-
-.history {
-  border-bottom-style: solid;
-  border-bottom-color: white;
-  border-bottom-width: thin
 }

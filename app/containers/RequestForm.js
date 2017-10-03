@@ -1,12 +1,15 @@
 import React from 'react';
 import { Field, formValueSelector } from 'redux-form';
 import { connect } from 'react-redux';
-import RequestSubmit from './RequestSubmit';
-import RequestHistory from './RequestHistory';
-import RequestResponse from './RequestResponse';
 import db from '../db';
+import RequestSubmit from '../components/RequestSubmit';
+import RequestHistory from '../components/RequestHistory';
+import RequestResponse from '../components/RequestResponse';
+import renderField from '../components/renderField';
+import SelectField from '../components/selectField';
 import sendRequest from '../utils/submit';
-import style from './App.css';
+
+const required = value => (value ? undefined : 'Required');
 
 class RequestForm extends React.Component {
   constructor(props) {
@@ -14,21 +17,54 @@ class RequestForm extends React.Component {
     this.state = {
       docs: [],
       doc: {},
+      errors: {},
     };
-    this.setState = this.setState.bind(this);
-    this.refresh = this.refresh.bind(this);
     this.submit = this.submit.bind(this);
+    this.refresh = this.refresh.bind(this);
+    this.setState = this.setState.bind(this);
+    this.validate = this.validate.bind(this);
+  }
+
+  validate() {
+    const { schemeValue, pathValue, methodValue, payloadValue } = this.props;
+
+    let payloadError;
+    if (payloadValue) {
+      try {
+        JSON.parse(payloadValue);
+      } catch (err) {
+        console.log(err);
+        payloadError = 'Must be a valid JSON {"key": "value"}';
+      }
+    } else {
+      payloadError = required(payloadValue);
+    }
+
+    if (!schemeValue || !pathValue || !methodValue || !payloadValue) {
+      this.setState({
+        errors: {
+          scheme: required(schemeValue),
+          path: required(pathValue),
+          method: required(methodValue),
+          payload: payloadError,
+        },
+      });
+      return false;
+    }
+    return true;
   }
 
   submit() {
-    const { schemeValue, pathValue, methodValue, payloadValue } = this.props;
-    let promise = new Promise(function(resolve, reject) {
-      resolve(sendRequest(schemeValue, pathValue, methodValue, payloadValue));
-    });
-    promise.then(res => {
-      this.setState({ doc: res });
-    });
-    this.refresh();
+    if (this.validate()) {
+      const { schemeValue, pathValue, methodValue, payloadValue } = this.props;
+      let promise = new Promise(function(resolve, reject) {
+        resolve(sendRequest(schemeValue, pathValue, methodValue, payloadValue));
+      });
+      promise.then(res => {
+        this.setState({ doc: res });
+        this.refresh();
+      });
+    }
   }
 
   refresh() {
@@ -43,96 +79,55 @@ class RequestForm extends React.Component {
   }
 
   render() {
-    console.log(this.state);
-    const { docs, doc } = this.state;
+    const { docs, doc, errors } = this.state;
     const { swagger, pathValue } = this.props;
-    const schemeOptions = swagger['schemes'].map(scheme => {
-      return (
-        <option key={scheme} value={scheme}>
-          {scheme}
-        </option>
-      );
-    });
-    const pathOptions = Object.keys(swagger['paths']).map(path => {
-      return (
-        <option key={path} value={path}>
-          {path}
-        </option>
-      );
-    });
-    let methodOptions;
-    if (pathValue) {
-      methodOptions = Object.keys(swagger['paths'][pathValue]).map(method => {
-        if (['GET', 'POST', 'PUT', 'PATCH', 'DELETE'].includes(method.toUpperCase())) {
-          return (
-            <option key={method} value={method}>
-              {method}
-            </option>
-          );
-        }
-      });
-    }
-
     return (
-      <div>
-        <table className={style.table}>
-          <tbody>
-            <tr>
-              <td>
-                <label>Scheme</label>
-              </td>
-              <td>
-                <Field name="scheme" component="select">
-                  <option />
-                  {schemeOptions}
-                </Field>
-              </td>
-            </tr>
-            <tr>
-              <td>
-                <label>Host </label>
-              </td>
-              <td>
-                {swagger['host']}
-              </td>
-            </tr>
-            <tr>
-              <td>
-                <label>Endpoint</label>
-              </td>
-              <td>
-                <Field name="path" component="select">
-                  <option />
-                  {pathOptions}
-                </Field>
-              </td>
-            </tr>
-            {pathValue
-              ? <tr>
-                  <td>
-                    <label>Request Method</label>
-                  </td>
-                  <td>
-                    <Field name="method" component="select">
-                      <option />
-                      {methodOptions}
-                    </Field>
-                  </td>
-                </tr>
-              : <tr />}
-            <tr>
-              <td>
-                <label>Request Body</label>
-              </td>
-              <td>
-                <Field name="payload" component="textarea" type="text" />
-              </td>
-            </tr>
-          </tbody>
-        </table>
+      <div className="form-horizontal" role="form">
+        <h3>Request</h3>
+        <Field
+          label="Scheme"
+          name="scheme"
+          component={SelectField}
+          options={swagger['schemes']}
+          error={errors.scheme}
+        />
+
+        <div className="form-group">
+          <label className="col-xs-2 control-label">Host</label>
+          <div className="col-xs-10">
+            <input value={swagger['host']} type="text" className="form-control" readOnly />
+          </div>
+        </div>
+
+        <Field
+          label="Endpoint"
+          name="path"
+          component={SelectField}
+          options={Object.keys(swagger['paths'])}
+          error={errors.path}
+        />
+
+        {pathValue
+          ? <div>
+              <Field
+                label="Request Method"
+                name="method"
+                component={SelectField}
+                options={Object.keys(swagger['paths'][pathValue])}
+                error={errors.method}
+              />
+            </div>
+          : <div />}
+
+        <Field
+          label="Request Body"
+          name="payload"
+          component={renderField}
+          type="text"
+          error={errors.payload}
+        />
         <RequestSubmit submit={this.submit} />
-        <br />
-        <RequestResponse text={doc.text} />
+        <RequestResponse doc={doc} />
         <RequestHistory docs={docs} />
       </div>
     );
@@ -140,7 +135,7 @@ class RequestForm extends React.Component {
 }
 
 const selector = formValueSelector('request');
-RequestForm = connect(state => {
+export default connect(state => {
   const schemeValue = selector(state, 'scheme');
   const pathValue = selector(state, 'path');
   const methodValue = selector(state, 'method');
@@ -152,5 +147,3 @@ RequestForm = connect(state => {
     payloadValue,
   };
 })(RequestForm);
-
-export default RequestForm;
