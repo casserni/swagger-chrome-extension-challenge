@@ -1,89 +1,33 @@
 import React from 'react';
-import { Field, formValueSelector } from 'redux-form';
+import { reduxForm, Field, formValueSelector } from 'redux-form';
 import { connect } from 'react-redux';
-import db from '../db';
+
 import RequestSubmit from '../components/RequestSubmit';
-import RequestHistory from '../components/RequestHistory';
 import RequestResponse from '../components/RequestResponse';
 import renderField from '../components/renderField';
 import SelectField from '../components/selectField';
-import sendRequest from '../utils/submit';
-
-const required = value => (value ? undefined : 'Required');
 
 class RequestForm extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      docs: [],
-      doc: {},
+      doc: { responseStatus: '' },
       errors: {},
     };
-    this.submit = this.submit.bind(this);
-    this.refresh = this.refresh.bind(this);
+    this.update = this.update.bind(this);
     this.setState = this.setState.bind(this);
-    this.validate = this.validate.bind(this);
   }
 
-  validate() {
-    const { schemeValue, pathValue, methodValue, payloadValue } = this.props;
-
-    let payloadError;
-    if (payloadValue) {
-      try {
-        JSON.parse(payloadValue);
-      } catch (err) {
-        console.log(err);
-        payloadError = 'Must be a valid JSON {"key": "value"}';
-      }
-    } else {
-      payloadError = required(payloadValue);
-    }
-
-    if (!schemeValue || !pathValue || !methodValue || !payloadValue) {
-      this.setState({
-        errors: {
-          scheme: required(schemeValue),
-          path: required(pathValue),
-          method: required(methodValue),
-          payload: payloadError,
-        },
-      });
-      return false;
-    }
-    return true;
-  }
-
-  submit() {
-    if (this.validate()) {
-      const { schemeValue, pathValue, methodValue, payloadValue } = this.props;
-      let promise = new Promise(function(resolve, reject) {
-        resolve(sendRequest(schemeValue, pathValue, methodValue, payloadValue));
-      });
-      promise.then(res => {
-        this.setState({ doc: res });
-        this.refresh();
-      });
-    }
-  }
-
-  refresh() {
-    let promise = new Promise(function(resolve, reject) {
-      db.find({}, function(err, docs) {
-        resolve(docs);
-      });
-    });
-    promise.then(res => {
-      this.setState({ docs: res });
-    });
+  update(obj) {
+    this.setState(obj);
   }
 
   render() {
-    const { docs, doc, errors } = this.state;
-    const { swagger, pathValue } = this.props;
+    const { doc, errors } = this.state;
+    const { swagger, pathValue, refresh } = this.props;
     return (
       <div className="form-horizontal" role="form">
-        <h3>Request</h3>
+        <h3 style={{ marginTop: '0px' }}>Request</h3>
         <Field
           label="Scheme"
           name="scheme"
@@ -126,24 +70,19 @@ class RequestForm extends React.Component {
           type="text"
           error={errors.payload}
         />
-        <RequestSubmit submit={this.submit} />
+        <RequestSubmit refresh={refresh} update={this.update} />
         <RequestResponse doc={doc} />
-        <RequestHistory docs={docs} />
       </div>
     );
   }
 }
 
 const selector = formValueSelector('request');
-export default connect(state => {
-  const schemeValue = selector(state, 'scheme');
+RequestForm = connect(state => {
   const pathValue = selector(state, 'path');
-  const methodValue = selector(state, 'method');
-  const payloadValue = selector(state, 'payload');
-  return {
-    schemeValue,
-    pathValue,
-    methodValue,
-    payloadValue,
-  };
+  return { pathValue };
+})(RequestForm);
+
+export default reduxForm({
+  form: 'request',
 })(RequestForm);

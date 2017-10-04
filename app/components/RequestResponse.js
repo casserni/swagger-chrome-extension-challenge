@@ -1,5 +1,5 @@
 import React from 'react';
-import style from './App.css';
+import style from '../App.css';
 
 export default class RequestResponse extends React.Component {
   render() {

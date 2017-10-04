@@ -1,5 +1,4 @@
 import request from 'superagent';
-import db from '../db';
 
 let sendRequest = (scheme, path, method, payload) => {
   let url = '';
@@ -15,49 +14,50 @@ let sendRequest = (scheme, path, method, payload) => {
     method: method,
     payload: pay,
   };
+  return new Promise((resolve, reject) => {
+    let send = request;
+    switch (method.toUpperCase()) {
+      case 'GET':
+        send.get(url).send(pay).set('accept', 'json').end((err, res) => {
+          doc.responseStatus = res.statusText;
+          doc.text = res.text;
+          resolve(doc);
+        });
+        break;
 
-  let send = request;
-  switch (method.toUpperCase()) {
-    case 'GET':
-      send.get(url).send(pay).set('accept', 'json').end((err, res) => {
-        doc.responseStatus = res.statusText;
-        doc.text = res.text;
-        db.insert(doc, function(err, newDoc) {});
-      });
-      break;
+      case 'POST':
+        send.post(url).send(pay).set('accept', 'json').end((err, res) => {
+          doc.responseStatus = res.statusText;
+          doc.text = res.text;
+          resolve(doc);
+        });
+        break;
 
-    case 'POST':
-      send.post(url).send(pay).set('accept', 'json').end((err, res) => {
-        doc.responseStatus = res.statusText;
-        doc.text = res.text;
-        db.insert(doc, function(err, newDoc) {});
-      });
-      break;
+      case 'PUT':
+        send.put(url).send(pay).set('accept', 'json').end((err, res) => {
+          doc.responseStatus = res.statusText;
+          doc.text = res.text;
+          resolve(doc);
+        });
+        break;
 
-    case 'PUT':
-      send.put(url).send(pay).set('accept', 'json').end((err, res) => {
-        doc.responseStatus = res.statusText;
-        doc.text = res.text;
-        db.insert(doc, function(err, newDoc) {});
-      });
-      break;
+      case 'PATCH':
+        send.patch(url).send(pay).set('accept', 'json').end((err, res) => {
+          doc.responseStatus = res.statusText;
+          doc.text = res.text;
+          resolve(doc);
+        });
+        break;
 
-    case 'PATCH':
-      send.patch(url).send(pay).set('accept', 'json').end((err, res) => {
-        doc.responseStatus = res.statusText;
-        doc.text = res.text;
-        db.insert(doc, function(err, newDoc) {});
-      });
-      break;
-
-    case 'DELETE':
-      send.delete(url).send(pay).set('accept', 'json').end((err, res) => {
-        doc.responseStatus = res.statusText;
-        doc.text = res.text;
-        db.insert(doc, function(err, newDoc) {});
-      });
-  }
-  return doc;
+      case 'DELETE':
+        send.delete(url).send(pay).set('accept', 'json').end((err, res) => {
+          doc.responseStatus = res.statusText;
+          doc.text = res.text;
+          resolve(doc);
+        });
+        break;
+    }
+  });
 };
 
 export default sendRequest;

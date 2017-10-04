@@ -1,0 +1,44 @@
+.App {
+}
+
+.SwaggerDebug {
+  margin: 10px;
+  max-height: 400px;
+  overflow: scroll;
+  font-size: 12px
+}
+
+.selected{
+  border: solid;
+  border-width: thin;
+  border-bottom: none;
+  border-top-right-radius: 4px;
+  border-top-left-radius: 4px;
+  background: #93c0ee;
+  border-color: #93c0ee;
+  padding: 5px
+}
+
+.not_selected{
+  border: solid;
+  border-width: thin;
+  border-bottom: none;
+  border-top-right-radius: 4px;
+  border-top-left-radius: 4px;
+  display:none;
+  border-color: #6584a4;
+  background: #6584a4;
+  padding: 5px
+
+}
+
+.content {
+  border: solid;
+  border-width: thin;
+  border-top: none;
+  border-radius: 4px;
+  border-top-left-radius: 0px;
+  border-color: #93c0ee;
+  background: #93c0ee;
+  padding: 15px
+}
