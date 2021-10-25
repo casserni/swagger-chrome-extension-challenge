@@ -1,4 +1,4 @@
-# Stoplight Coding Challenge - Swagger Request Maker
+# Coding Challenge - Swagger Request Maker
 
 Using the boilerplate provided, create a chrome extension that processes a [Swagger](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md) file and displays a UI for easily sending HTTP requests based on the operations defined in the Swagger spec.
 
